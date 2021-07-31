@@ -2,7 +2,7 @@
 
 use core\Router\Route;
 
-Route::Get("/{shortUrl}", app\Controllers\BasicController::class, 'giveShortUrl');
+Route::Get("/{shortPathName}", app\Controllers\BasicController::class, 'index');
 
 Route::Put("/addUrl", app\Controllers\BasicController::class, 'addUrl');
 
