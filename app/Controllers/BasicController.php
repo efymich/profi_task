@@ -8,15 +8,20 @@ class BasicController
 {
     public function addUrl(array $data)
     {
-        $url = json_decode(file_get_contents('php://input'), true);
+        $urlRaw = json_decode(file_get_contents('php://input'), true);
 
-//        if (!$this->validateUrl($url)) {
-//            die('Url is not validate!');
-//        }
+        $url = parse_url($urlRaw['href']) ?? die();
+        if (!$this->validateUrl($url)) {
+            die('Url is not validate!');
+        }
 
-        $protocol = $url['protocol'] ?? '';
+        $protocol = $url['scheme'];
         $oldHost = $url['host'];
-        $oldPathName = $url['pathName'];
+        if ($url['query'] !== null) {
+            $oldPathName = $url['path'] . "?" . $url['query'];
+        } else {
+            $oldPathName = $url['path'];
+        }
         if ($url['customPathName']) {
             $shortPathName = $url['customPathName'];
         } else {
@@ -35,7 +40,7 @@ class BasicController
 
     public function index(array $data)
     {
-        $shortPathName = $data['shortPathName'];
+        $shortPathName = $data['token'];
 
         $query = "SELECT protocol,oldHost,oldPathName FROM urlTable WHERE shortPathName = ?";
 
@@ -46,7 +51,7 @@ class BasicController
         $protocol = $resArray['protocol'];
         $host = $resArray['oldHost'];
         $path = $resArray['oldPathName'];
-        header("Location: $protocol$host$path");
+        header("Location: $protocol://$host$path");
         exit;
     }
 
@@ -57,8 +62,19 @@ class BasicController
         return $hex;
     }
 
-    private function validateUrl(string $json): bool
+    private function validateUrl(array $url): bool
     {
-        return true;
+        if ($url['scheme'] === null || $url['host'] === null) {
+            return false;
+        }
+
+        $firstCon = preg_match("/(http|https|ftp)/", $url['scheme']) ? true : false;
+        $secondCon = preg_match("/^(www.|)[a-zA-Z0-9]+.(com|ru|org|net|gov|biz)$/", $url['host']) ? true : false;
+//        $thirdCon = preg_match("/\/.*\/$/",$url["path"]) ? true : false;
+
+        if ($firstCon && $secondCon) {
+            return true;
+        }
+        return false;
     }
 }

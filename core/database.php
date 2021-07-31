@@ -15,7 +15,8 @@ function databaseConnect(): mysqli
         $config['host'],
         $config['user'],
         $config['password'],
-        $config['database']
+        $config['database'],
+        $config['port']
     );
     return $instance;
 }

@@ -12,6 +12,8 @@ class App
     {
         require '../route/roadmap.php';
         $url = $_SERVER['REQUEST_URI'];
-        RouteContainer::Searcher($url);
+        $type = strtolower($_SERVER['REQUEST_METHOD']);
+        RouteContainer::Searcher($url, $type);
     }
+
 }

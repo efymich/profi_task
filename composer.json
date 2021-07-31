@@ -1,0 +1,11 @@
+{
+  "require": {
+  },
+  "autoload": {
+    "psr-4": {
+      "app\\Controllers\\": "app/Controllers",
+      "core\\": "core/",
+      "core\\Router\\": "core/Router"
+    }
+  }
+}

@@ -2,9 +2,6 @@
 
 use core\App;
 
-spl_autoload_register(function ($class) {
-    $class = str_replace("\\", '/', $class);
-    include '../' . $class . '.php';
-});
+require "../vendor/autoload.php";
 
 App::Init();
