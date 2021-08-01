@@ -4,15 +4,20 @@
 namespace app\Controllers;
 
 
+use core\Response\ErrorResponse;
+use core\Response\InfoResponse;
+use core\Response\JsonResponse;
+
 class BasicController
 {
-    public function addUrl(array $data)
+    public function addUrl(array $data): JsonResponse
     {
         $urlRaw = json_decode(file_get_contents('php://input'), true);
 
         $url = parse_url($urlRaw['href']) ?? die();
         if (!$this->validateUrl($url)) {
-            die('Url is not validate!');
+//            die('Url is not validate!');
+            return new ErrorResponse(404, "Url is not validate");
         }
 
         $protocol = $url['scheme'];
@@ -34,8 +39,12 @@ class BasicController
         databaseExecute($query, $protocol, $oldHost, $oldPathName, $shortPathName);
 
         if (!databaseErrors()) {
-            echo 'Url was added';
+            $res = [
+                "newUrl" => "$shortPathName"
+            ];
+            return new InfoResponse($res);
         }
+        return new ErrorResponse(404, "Url is not added!");
     }
 
     public function index(array $data)
