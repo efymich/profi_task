@@ -4,7 +4,9 @@ namespace core\Response\Response_interface;
 
 interface iResponse
 {
-    public function formHeader();
+    public function setHeaders();
 
-    public function formBody();
+    public function convertArray();
+
+    public function giveResponse();
 }

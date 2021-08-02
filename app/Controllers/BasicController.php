@@ -6,18 +6,18 @@ namespace app\Controllers;
 
 use core\Response\ErrorResponse;
 use core\Response\InfoResponse;
-use core\Response\JsonResponse;
+use core\Response\Response;
+use core\Response\Response_interface\iResponse;
 
 class BasicController
 {
-    public function addUrl(array $data): JsonResponse
+    public function addUrl(array $data): Response
     {
         $urlRaw = json_decode(file_get_contents('php://input'), true);
 
         $url = parse_url($urlRaw['href']) ?? die();
         if (!$this->validateUrl($url)) {
-//            die('Url is not validate!');
-            return new ErrorResponse(404, "Url is not validate");
+            return new ErrorResponse(412, "Url is not validate");
         }
 
         $protocol = $url['scheme'];
@@ -40,14 +40,15 @@ class BasicController
 
         if (!databaseErrors()) {
             $res = [
+                "description" => "Query is OK",
                 "newUrl" => "$shortPathName"
             ];
             return new InfoResponse($res);
         }
-        return new ErrorResponse(404, "Url is not added!");
+        return new ErrorResponse(500, "Database error!");
     }
 
-    public function index(array $data)
+    public function index(array $data): iResponse
     {
         $shortPathName = $data['token'];
 
@@ -60,8 +61,7 @@ class BasicController
         $protocol = $resArray['protocol'];
         $host = $resArray['oldHost'];
         $path = $resArray['oldPathName'];
-        header("Location: $protocol://$host$path");
-        exit;
+        return new InfoResponse("redirect", ["Location" => "$protocol://$host$path"]);
     }
 
     private function giveUrlKey()

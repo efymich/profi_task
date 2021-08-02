@@ -5,7 +5,9 @@
     "psr-4": {
       "app\\Controllers\\": "app/Controllers",
       "core\\": "core/",
-      "core\\Router\\": "core/Router"
+      "core\\Router\\": "core/Router",
+      "core\\Response\\": "core/Response",
+      "core\\Response\\Response_interface\\": "core/Response/Response_interface"
     }
   }
 }

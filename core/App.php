@@ -2,7 +2,7 @@
 
 namespace core;
 
-use core\Response\JsonResponse;
+use core\Response\Response_interface\iResponse;
 use core\Router\RouteContainer;
 
 require "database.php";
@@ -12,14 +12,12 @@ class App
     public static function Init()
     {
         /**
-         * @var $response_obj JsonResponse
+         * @var $response_obj iResponse
          */
         require '../route/roadmap.php';
         $url = $_SERVER['REQUEST_URI'];
         $type = strtolower($_SERVER['REQUEST_METHOD']);
         $response_obj = RouteContainer::Searcher($url, $type);
-        $response_obj->formHeader();
-        echo $response_obj->formBody();
+        $response_obj->giveResponse();
     }
-
 }
