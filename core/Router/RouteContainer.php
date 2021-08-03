@@ -4,6 +4,8 @@
 namespace core\Router;
 
 
+use core\Response\ErrorResponse;
+
 class RouteContainer
 {
     private static array $routes = [];
@@ -24,6 +26,6 @@ class RouteContainer
             }
             return $router->Apply($data);
         }
-        die('Check failed!');
+        return new ErrorResponse(404, "Not found");
     }
 }

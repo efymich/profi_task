@@ -6,6 +6,8 @@ use core\Response\Response_interface\iResponse;
 use core\Router\RouteContainer;
 
 require "database.php";
+require "helpers.php";
+
 
 class App
 {

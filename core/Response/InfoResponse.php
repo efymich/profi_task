@@ -21,9 +21,17 @@ class InfoResponse extends Response
 
     public function convertArray()
     {
-        $arr = [$this->wrapper => $this->data];
+        if (gettype($this->data) === "string" || is_assoc($this->data) === false) {
+            $json = [$this->wrapper => $this->data];
+            return json_encode($json);
+        }
 
-        return json_encode($arr);
+        if (is_assoc($this->data) === true) {
+            return json_encode($this->data);
+        }
+
+        $json = [$this->wrapper => null];
+        return json_encode($json);
     }
 
     public function setHeaders()

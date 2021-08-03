@@ -1,5 +1,6 @@
 {
   "require": {
+    "hashids/hashids": "^4.1"
   },
   "autoload": {
     "psr-4": {

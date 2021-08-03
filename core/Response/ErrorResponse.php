@@ -6,35 +6,29 @@ namespace core\Response;
 class ErrorResponse extends Response
 {
     public int $responseCode;
-    public string $wrapper = 'data';
-    public $data;
+    public string $description;
     private array $headers = [
-        "Content-type" => "text/html"
+        "Content-Type" => "application/json"
     ];
 
 
-    public function __construct($responseCode, $data, $headers = [])
+    public function __construct($responseCode, $description, $headers = [])
     {
         $this->responseCode = $responseCode;
         foreach ($headers as $headerKey => $headerVal) {
             $this->headers[$headerKey] = $headerVal;
         }
-        $this->data = $data;
+        $this->description = $description;
     }
 
     public function convertArray()
     {
-        if (gettype($this->data) === "string") {
-            return $this->data;
-        }
-        if (gettype($this->data) === "array") {
-            $res = '';
-            foreach ($this->data as $key => $val) {
-                $res .= "$key : $val \n";
-            }
-            return $res;
-        }
-        return "$this->wrapper : null";
+        $arr = [
+            'code' => $this->responseCode,
+            'description' => $this->description
+        ];
+
+        return json_encode($arr);
     }
 
     public function setHeaders()
