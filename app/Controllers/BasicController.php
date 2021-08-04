@@ -9,6 +9,7 @@ use core\Response\InfoResponse;
 use core\Response\Response;
 use core\Response\Response_interface\iResponse;
 use Hashids\Hashids;
+use mysqli_sql_exception;
 
 class BasicController
 {
@@ -24,9 +25,16 @@ class BasicController
             return new ErrorResponse(400, "Url is not validate");
         }
 
+
+        $mysqli = dataBaseConnect();
+
+
         if (isset($url['customToken'])) {
             $token = $url['customToken'];
-            $result = databaseExecute("SELECT token FROM urlTable");
+            $stmt = mysqli_prepare($mysqli, "SELECT token FROM urlTable");
+            mysqli_stmt_bind_param($stmt, 's', $token);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
             while ($row = mysqli_fetch_assoc($result)) {
                 if ($token === $row['token']) {
                     return new ErrorResponse(500, "token must be unique!");
@@ -34,22 +42,36 @@ class BasicController
             }
         }
 
-        $longUrl = $url['href'];
+        mysqli_begin_transaction($mysqli);
 
-        $query = "INSERT INTO urlTable (longUrl) VALUES (?)";
+        try {
+            $longUrl = $url['href'];
+            $stmt = mysqli_prepare($mysqli, "INSERT INTO urlTable (longUrl) VALUES (?) ");
+            mysqli_stmt_bind_param($stmt, 's', $longUrl);
+            mysqli_stmt_execute($stmt);
 
-        databaseExecute($query, $longUrl);
+            // operator RETURNING is not supported in my local mariadb version
+            $stmt = mysqli_prepare($mysqli, "SELECT id FROM urlTable ORDER BY created_at DESC LIMIT 1");
+            mysqli_stmt_bind_param($stmt, 'i', $longUrl);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $resArr = mysqli_fetch_assoc($result);
 
-        $id = $this->giveId();
+            $id = $resArr['id'];
+            $token = $this->encodeToken($id);
+            if (isset($url['customToken'])) {
+                $token = $url['customToken'];
+            }
 
-        $token = $this->encodeToken($id);
-        if (isset($url['customToken'])) {
-            $token = $url['customToken'];
+            $stmt = mysqli_prepare($mysqli, "UPDATE urlTable SET token = ? WHERE id = ?");
+            mysqli_stmt_bind_param($stmt, 'si', $token, $id);
+            mysqli_stmt_execute($stmt);
+
+            mysqli_commit($mysqli);
+        } catch (mysqli_sql_exception $exception) {
+            mysqli_rollback($mysqli);
+            throw $exception;
         }
-
-        $query = "UPDATE urlTable SET token = ? WHERE id = ?";
-
-        databaseExecute($query, $token, $id);
 
         if (!databaseErrors()) {
             $res = [
@@ -99,16 +121,5 @@ class BasicController
             return true;
         }
         return false;
-    }
-
-    private function giveId(): int
-    {
-        $query = "SELECT id FROM urlTable ORDER BY created_at DESC LIMIT 1";
-
-        $result = databaseExecute($query);
-
-        $resArray = mysqli_fetch_assoc($result);
-
-        return $resArray['id'];
     }
 }
