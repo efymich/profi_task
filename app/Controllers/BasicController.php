@@ -33,9 +33,8 @@ class BasicController
             mysqli_stmt_bind_param($stmt, 's', $token);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
-            $resArr = mysqli_fetch_assoc($result);
-            foreach ($resArr as $tokenVal) {
-                if ($token === $tokenVal) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                if ($token === $row['token']) {
                     return new ErrorResponse(500, "token must be unique!");
                 }
             }
@@ -45,8 +44,13 @@ class BasicController
 
         try {
             $longUrl = $url['href'];
-            $stmt = mysqli_prepare($mysqli, "INSERT INTO urlTable (longUrl) VALUES (?) RETURNING (id)");
+            $stmt = mysqli_prepare($mysqli, "INSERT INTO urlTable (longUrl) VALUES (?) ");
             mysqli_stmt_bind_param($stmt, 's', $longUrl);
+            mysqli_stmt_execute($stmt);
+
+            // operator RETURNING is not supported in my local mariadb version
+            $stmt = mysqli_prepare($mysqli, "SELECT id FROM urlTable ORDER BY created_at DESC LIMIT 1");
+            mysqli_stmt_bind_param($stmt, 'i', $longUrl);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
             $resArr = mysqli_fetch_assoc($result);
