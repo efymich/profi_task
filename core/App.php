@@ -21,5 +21,6 @@ class App
         $type = strtolower($_SERVER['REQUEST_METHOD']);
         $response_obj = RouteContainer::Searcher($url, $type);
         $response_obj->giveResponse();
+        databaseClose();
     }
 }
