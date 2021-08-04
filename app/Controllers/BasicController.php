@@ -27,15 +27,26 @@ class BasicController
 
         $mysqli = dataBaseConnect();
 
+        if (isset($url['customToken'])) {
+            $token = $url['customToken'];
+            $stmt = mysqli_prepare($mysqli, "SELECT token FROM urlTable");
+            mysqli_stmt_bind_param($stmt, 's', $token);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $resArr = mysqli_fetch_assoc($result);
+            foreach ($resArr as $tokenVal) {
+                if ($token === $tokenVal) {
+                    return new ErrorResponse(500, "token must be unique!");
+                }
+            }
+        }
+
         mysqli_begin_transaction($mysqli);
 
         try {
             $longUrl = $url['href'];
-            $stmt = mysqli_prepare($mysqli, "INSERT INTO urlTable (longUrl) VALUES (?)");
+            $stmt = mysqli_prepare($mysqli, "INSERT INTO urlTable (longUrl) VALUES (?) RETURNING (id)");
             mysqli_stmt_bind_param($stmt, 's', $longUrl);
-            mysqli_stmt_execute($stmt);
-
-            $stmt = mysqli_prepare($mysqli, "SELECT id FROM urlTable ORDER BY created_at DESC LIMIT 1");
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
             $resArr = mysqli_fetch_assoc($result);
@@ -49,7 +60,6 @@ class BasicController
             $stmt = mysqli_prepare($mysqli, "UPDATE urlTable SET token = ? WHERE id = ?");
             mysqli_stmt_bind_param($stmt, 'si', $token, $id);
             mysqli_stmt_execute($stmt);
-
 
             mysqli_commit($mysqli);
         } catch (mysqli_sql_exception $exception) {
