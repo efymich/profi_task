@@ -92,5 +92,5 @@ components:
       example: ""
     customToken:
       type: string
-      description: "Человекочитабельный ID короткой ссылки"
+      description: "Человекочитабельная ссылка"
       example: "cat"

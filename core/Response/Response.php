@@ -11,17 +11,17 @@ abstract class Response implements iResponse
     public $data;
     private array $headers = [];
 
-    public function setHeaders()
-    {
-        foreach ($this->headers as $headerKey => $headerVal) {
-            header("$headerKey:$headerVal;");
-        }
-    }
-
     public function giveResponse()
     {
         $this->setHeaders();
 
         die($this->convertArray());
+    }
+
+    protected function setHeaders()
+    {
+        foreach ($this->headers as $headerKey => $headerVal) {
+            header("$headerKey:$headerVal;");
+        }
     }
 }
