@@ -29,6 +29,9 @@ class BasicController
 
         if (isset($url['customToken'])) {
             $token = $url['customToken'];
+            if (strlen($token) > 10) {
+                return new ErrorResponse(500, "token have more than 10 symbols!");
+            }
             $stmt = mysqli_prepare($mysqli, "SELECT token FROM urlTable");
             mysqli_stmt_bind_param($stmt, 's', $token);
             mysqli_stmt_execute($stmt);
