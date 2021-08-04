@@ -25,9 +25,7 @@ class BasicController
             return new ErrorResponse(400, "Url is not validate");
         }
 
-
         $mysqli = dataBaseConnect();
-
 
         if (isset($url['customToken'])) {
             $token = $url['customToken'];
