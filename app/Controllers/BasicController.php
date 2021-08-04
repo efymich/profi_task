@@ -24,6 +24,16 @@ class BasicController
             return new ErrorResponse(400, "Url is not validate");
         }
 
+        if (isset($url['customToken'])) {
+            $token = $url['customToken'];
+            $result = databaseExecute("SELECT token FROM urlTable");
+            while ($row = mysqli_fetch_assoc($result)) {
+                if ($token === $row['token']) {
+                    return new ErrorResponse(500, "token must be unique!");
+                }
+            }
+        }
+
         $longUrl = $url['href'];
 
         $query = "INSERT INTO urlTable (longUrl) VALUES (?)";

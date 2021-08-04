@@ -1,6 +1,7 @@
 {
   "require": {
-    "hashids/hashids": "^4.1"
+    "hashids/hashids": "^4.1",
+    "ext-mysqli": "*"
   },
   "autoload": {
     "psr-4": {
